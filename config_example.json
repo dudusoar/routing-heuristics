@@ -1,0 +1,52 @@
+{
+  "description": "Example configuration for PDPTW with ALNS",
+  "problem": {
+    "problem_type": "pdptw",
+    "num_vehicles": 4,
+    "vehicle_capacity": 6.0,
+    "battery_capacity": 8.0,
+    "battery_consume_rate": 1.0,
+    "penalty_unvisited": 100.0,
+    "penalty_delayed": 15.0,
+    "time_window_length": 60,
+    "service_time": 5,
+    "extra_time": 15,
+    "robot_speed": 4.0
+  },
+  "algorithm": {
+    "algorithm_type": "alns",
+    "alns_config": {
+      "num_removal": 5,
+      "p": 4.0,
+      "k": 3,
+      "L_max": 5,
+      "avg_remove_order": 2.0,
+      "max_no_improve": 100,
+      "segment_length": 100,
+      "num_segments": 10,
+      "r": 0.1,
+      "sigma": [33.0, 9.0, 13.0],
+      "start_temp": 10000.0,
+      "cooling_rate": 0.99,
+      "cost_ci_obj_diff_threshold": 0.1,
+      "cost_ci_window_size": 25,
+      "removal_indices": [0, 2, 3],
+      "repair_indices": [0, 1]
+    }
+  },
+  "data": {
+    "map_type": "synthetic",
+    "synthetic_num_nodes": 20,
+    "synthetic_grid_size": 100.0,
+    "num_time_intervals": 6,
+    "demand_per_order": 1.0
+  },
+  "run": {
+    "random_seed": 42,
+    "num_runs": 1,
+    "output_dir": "results",
+    "save_solutions": true,
+    "save_logs": true,
+    "verbose": true
+  }
+}
