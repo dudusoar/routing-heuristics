@@ -1,189 +1,110 @@
 # routing-heuristics
 
-A reusable research framework for vehicle routing heuristics, with current focus on PDPTW, ALNS, tutorials, and solver experimentation.
+A reusable research framework for vehicle-routing heuristics. The current package focuses on
+PDPTW instances, ALNS, synthetic data generation, real-map support, tutorial notebooks, and an
+interactive Streamlit playground.
 
-> **Status**: Phase 1 Complete - Ready for installation and basic usage
-
-## 🚀 Quick Installation
+## Install
 
 ```bash
-# From this repository root
 uv venv
 uv pip install -e ".[dev]"
+```
 
-# Optional real-world map support
+Optional real-world map support:
+
+```bash
 uv pip install -e ".[osmnx]"
 ```
 
-## 📦 Package Structure
+## Repository Layout
 
-```
+```text
 routing-heuristics/
-├── vrp_toolkit/          # Main Python package
-│   ├── problems/         # Problem definitions
-│   │   └── pdptw.py     # PDPTW implementation
-│   ├── algorithms/       # Solving algorithms
-│   │   └── alns/        # Adaptive Large Neighborhood Search
-│   ├── data/            # Data generation and loading
-│   │   ├── generators.py # Synthetic data
-│   │   └── map.py       # Real-world map integration
-│   ├── visualization/    # Plotting utilities
-│   └── utils/           # Common utilities
-├── tutorials/           # Educational notebooks
-├── playground/          # Streamlit learning interface
-├── contracts/           # Playground and reproducibility contract tests
-├── runs/                # Local experiment notes
-├── tests/              # Unit tests
-└── pyproject.toml      # Package configuration
+|-- vrp_toolkit/      # Main Python package
+|   |-- problems/     # Problem definitions such as PDPTW
+|   |-- algorithms/   # Solver implementations, currently ALNS
+|   |-- data/         # Synthetic and map-based data helpers
+|   |-- visualization/# Plotting utilities
+|   `-- utils/        # Shared helpers
+|-- tutorials/        # Notebook examples
+|-- playground/       # Streamlit learning interface
+|-- contracts/        # Behavior contracts for playground-facing code
+|-- tests/            # Unit and integration tests
+|-- pyproject.toml    # Package metadata
+`-- DEVELOPMENT.md    # Roadmap and maintenance notes
 ```
 
-## 🎯 Quick Example
+Generated data, map caches, and playground experiment outputs are intentionally ignored by Git.
 
-```python
-from vrp_toolkit.problems.pdptw import PDPTWInstance
-from vrp_toolkit.algorithms.alns.solver import ALNSSolver
-from vrp_toolkit.data.generators import OrderGenerator
+## Core Concepts
 
-# Generate a sample instance
-generator = OrderGenerator(num_orders=20, num_vehicles=3)
-instance = generator.generate_instance()
+Problem layer:
 
-# Solve with ALNS
-solver = ALNSSolver()
-solution = solver.solve(instance)
+- `PDPTWInstance` represents pickup-delivery problems with time windows.
+- `PDPTWSolution` represents routes, objective values, and feasibility checks.
 
-print(f"Best cost: {solution.total_cost}")
-print(f"Routes: {solution.routes}")
+Algorithm layer:
+
+- `ALNSSolver` exposes the unified solver interface.
+- `ALNS` and `ALNSConfig` expose the lower-level adaptive large neighborhood search runner.
+
+Data layer:
+
+- `RealMap` builds synthetic coordinate maps for examples.
+- `DemandGenerator` and `OrderGenerator` produce PDPTW order tables.
+- OSMnx extras support real street-network workflows.
+
+## Tutorials
+
+The tutorial notebooks cover:
+
+1. Basic quickstart workflow.
+2. Real-world maps with OSMnx.
+3. Custom PDPTW problems.
+4. Problem variants.
+5. Parameter sensitivity analysis.
+6. Custom algorithms.
+7. Synthetic data generation.
+
+Tutorial tests live under `tests/tutorials/`.
+
+## Playground
+
+Run the interactive app with:
+
+```bash
+streamlit run playground/app.py
 ```
 
-## 🏗️ Core Concepts
+The app currently supports synthetic PDPTW generation, ALNS configuration, route visualization,
+problem-variant presets, and local experiment export. See `playground/README.md`.
 
-### Problem Layer
-- **`PDPTWInstance`**: Defines a PDPTW problem with nodes, time windows, and demands
-- **`Solution`**: Represents a feasible solution with routes and costs
-- **`Node`**: Individual location with pickup/delivery constraints
+## Testing
 
-### Algorithm Layer
-- **`ALNSSolver`**: Adaptive Large Neighborhood Search implementation
-- **`Operator`**: Destruction and repair operators for ALNS
-- Common interface: `Solver.solve(instance) -> Solution`
-
-### Data Layer
-- **`OrderGenerator`**: Synthetic order generation
-- **`MapLoader`**: Real-world map integration via OSMnx
-- **`DistanceMatrix`**: Pre-computed distances between locations
-
-## 📊 Features
-
-### Currently Implemented
-- ✅ PDPTW problem definition
-- ✅ ALNS algorithm with configurable operators
-- ✅ Synthetic data generation
-- ✅ Basic visualization
-- ✅ Real-world map integration (OSMnx)
-- ✅ Seven comprehensive tutorials covering all features
-
-### Coming Soon
-- Genetic Algorithm implementation
-- Additional VRP variants (CVRP, VRPTW)
-- Benchmark suite
-- Web visualization interface
-
-## 📚 Tutorials
-
-Start with these interactive notebooks:
-
-1. **`tutorials/01_quickstart.ipynb`** - Basic usage and problem solving
-2. **`tutorials/02_real_world_maps.ipynb`** - Real-world street networks with OSMnx
-3. **`tutorials/03_custom_problems.ipynb`** - Creating custom PDPTW problems ⭐ NEW!
-4. **`tutorials/04_problem_variants.ipynb`** - VRP, CVRP, PDP, PDPTW variants ⭐ NEW!
-5. **`tutorials/05_sensitivity_analysis.ipynb`** - Parameter sensitivity analysis
-6. **`tutorials/06_custom_algorithms.ipynb`** - Implementing custom heuristics ⭐ NEW!
-7. **`tutorials/07_data_generation.ipynb`** - Synthetic data generation ⭐ NEW!
-
-## 🗺️ Real-World Integration
-
-Use real street networks from OpenStreetMap:
-
-```python
-from vrp_toolkit.data import create_pdptw_from_osm
-
-# Create PDPTW instance from real location
-order_table, dist_matrix, time_matrix, G, node_map = create_pdptw_from_osm(
-    place_name="Purdue University, West Lafayette, IN, USA",
-    depot_location=(40.4237, -86.9212),
-    pickup_locations=[(40.4280, -86.9145), (40.4200, -86.9180)],
-    delivery_locations=[(40.4250, -86.9100), (40.4210, -86.9220)],
-    cache_file="data/purdue_network.graphml"
-)
-
-# Solve and visualize routes on real streets!
-```
-
-## 🔧 Development
-
-### Running Tests
 ```bash
 pytest tests/
+pytest contracts/ -v
 ```
 
-### Code Style
+Notebook execution tests require Jupyter and nbconvert:
+
 ```bash
-# Format code
-black vrp_toolkit/
-
-# Check style
-ruff check vrp_toolkit/
+python tests/tutorials/test_notebooks.py
 ```
 
-### Adding New Algorithms
-1. Create new solver class in `vrp_toolkit/algorithms/[name]/`
-2. Implement `solve(instance) -> Solution` method
-3. Add configuration options
-4. Create example in `examples/`
+## Development
 
-## 📖 API Reference
+Common maintenance commands:
 
-### Main Classes
-
-#### `PDPTWInstance`
-```python
-class PDPTWInstance:
-    nodes: List[Node]          # All nodes (depot, pickups, deliveries)
-    distance_matrix: np.ndarray # Distance between nodes
-    vehicle_capacity: float     # Vehicle capacity constraint
-    time_horizon: float        # Operating time window
+```bash
+black vrp_toolkit tests contracts playground
+ruff check vrp_toolkit tests contracts playground
+python -m compileall -q vrp_toolkit playground contracts tests run_tests.py
 ```
 
-#### `ALNSSolver`
-```python
-class ALNSSolver:
-    def __init__(self, max_iterations=1000, ...):
-        # Configuration parameters
-    
-    def solve(self, instance: PDPTWInstance) -> Solution:
-        # Main solving method
-```
+See `DEVELOPMENT.md` for roadmap and repository hygiene notes.
 
-#### `OrderGenerator`
-```python
-class OrderGenerator:
-    def generate_instance(self, num_orders=20, num_vehicles=3) -> PDPTWInstance:
-        # Generate synthetic instance
-```
+## License
 
-## 🤝 Contributing
-
-1. Follow the three-layer architecture (Problem/Algorithm/Data)
-2. Add type hints for public APIs
-3. Include basic docstrings
-4. Add integration tests for new features
-5. Update relevant tutorials
-
-## 📄 License
-
-Intended for academic and educational use. See repository LICENSE file for details.
-
----
-
-**routing-heuristics** - Transforming routing research code into reusable heuristic frameworks.
+MIT. See `pyproject.toml` and the repository license file when present.

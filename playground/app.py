@@ -985,6 +985,6 @@ st.markdown("---")
 st.markdown("""
 <div style='text-align: center; color: #666; padding: 20px;'>
     <p>Routing Heuristics Playground | Learn by Playing, Not by Reading Code</p>
-    <p style='font-size: 0.8em;'>See <code>playground/VISION.md</code> for design philosophy</p>
+    <p style='font-size: 0.8em;'>See <code>playground/README.md</code> for usage and maintenance notes</p>
 </div>
 """, unsafe_allow_html=True)

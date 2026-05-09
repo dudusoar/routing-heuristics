@@ -33,8 +33,9 @@ cache/
 *.graphml
 *.graphml.gz
 
-# Data files (uncomment if you don't want to track data)
-# data/
+# Generated local data and playground outputs
+data/
+runs/
 
 # Test outputs
 .pytest_cache/
