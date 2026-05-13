@@ -1,9 +1,9 @@
 [project]
 name = "routing-heuristics"
-version = "0.1.0"
-description = "Reusable VRP/PDPTW solving framework with ALNS algorithm and real-world map integration"
+version = "0.2.0"
+description = "Clean VRP/PDP routing heuristics toolkit with composable constraints"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.11"
 authors = [
     {name = "Yuchendu", email = "yuchendu@example.com"}
 ]
@@ -14,34 +14,22 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
     "Topic :: Scientific/Engineering :: Mathematics",
-    "Topic :: Software Development :: Libraries :: Python Modules",
 ]
-dependencies = [
-    "numpy>=1.24.0",
-    "pandas>=2.0.0",
-    "matplotlib>=3.7.0",
-    "networkx>=3.0",
-]
+dependencies = []
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=7.0.0",
     "black>=23.0.0",
     "ruff>=0.1.0",
-    "ipython>=8.0.0",
-    "jupyter>=1.0.0",
-]
-osmnx = [
-    "osmnx>=1.6.0",
-    "geopandas>=0.14.0",
-    "folium>=0.15.0",
 ]
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["vrp_heuristics"]
 
 [tool.ruff]
 line-length = 100

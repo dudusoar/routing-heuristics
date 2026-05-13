@@ -1,110 +1,77 @@
 # routing-heuristics
 
-A reusable research framework for vehicle-routing heuristics. The current package focuses on
-PDPTW instances, ALNS, synthetic data generation, real-map support, tutorial notebooks, and an
-interactive Streamlit playground.
+A compact routing-heuristics toolkit for VRP / PDP / PDPTW-style research.
 
-## Install
+The current codebase is intentionally small. Legacy `vrp_toolkit` code from the
+TRE paper extraction is archived under `archive/legacy_vrp_toolkit_2026_05_12/`
+for reference while the new package is rebuilt around solver-independent problem
+and constraint interfaces.
 
-```bash
-uv venv
-uv pip install -e ".[dev]"
-```
-
-Optional real-world map support:
-
-```bash
-uv pip install -e ".[osmnx]"
-```
-
-## Repository Layout
+## Package Layout
 
 ```text
-routing-heuristics/
-|-- vrp_toolkit/      # Main Python package
-|   |-- problems/     # Problem definitions such as PDPTW
-|   |-- algorithms/   # Solver implementations, currently ALNS
-|   |-- data/         # Synthetic and map-based data helpers
-|   |-- visualization/# Plotting utilities
-|   `-- utils/        # Shared helpers
-|-- tutorials/        # Notebook examples
-|-- playground/       # Streamlit learning interface
-|-- contracts/        # Behavior contracts for playground-facing code
-|-- tests/            # Unit and integration tests
-|-- pyproject.toml    # Package metadata
-`-- DEVELOPMENT.md    # Roadmap and maintenance notes
+vrp_heuristics/
+|-- core/          # ProblemInstance, ProblemSnapshot, vehicles, requests, routes
+|-- constraints/   # Route profile evaluator and composable constraints
+|-- objectives/    # Objective functions over route profiles
+`-- solvers/       # Candidate generators such as greedy insertion
 ```
 
-Generated data, map caches, and playground experiment outputs are intentionally ignored by Git.
+The main design boundary is:
 
-## Core Concepts
-
-Problem layer:
-
-- `PDPTWInstance` represents pickup-delivery problems with time windows.
-- `PDPTWSolution` represents routes, objective values, and feasibility checks.
-
-Algorithm layer:
-
-- `ALNSSolver` exposes the unified solver interface.
-- `ALNS` and `ALNSConfig` expose the lower-level adaptive large neighborhood search runner.
-
-Data layer:
-
-- `RealMap` builds synthetic coordinate maps for examples.
-- `DemandGenerator` and `OrderGenerator` produce PDPTW order tables.
-- OSMnx extras support real street-network workflows.
-
-## Tutorials
-
-The tutorial notebooks cover:
-
-1. Basic quickstart workflow.
-2. Real-world maps with OSMnx.
-3. Custom PDPTW problems.
-4. Problem variants.
-5. Parameter sensitivity analysis.
-6. Custom algorithms.
-7. Synthetic data generation.
-
-Tutorial tests live under `tests/tutorials/`.
-
-## Playground
-
-Run the interactive app with:
-
-```bash
-streamlit run playground/app.py
+```text
+ProblemInstance + ProblemSnapshot
+-> solver generates candidate routes
+-> RouteEvaluator builds a shared route profile
+-> ConstraintSet evaluates feasibility
+-> Objective scores feasible candidates
 ```
 
-The app currently supports synthetic PDPTW generation, ALNS configuration, route visualization,
-problem-variant presets, and local experiment export. See `playground/README.md`.
+Solvers do not own problem semantics such as depot, terminal policy, battery,
+capacity, or time windows. Those belong to the core problem/snapshot schema and
+the constraint layer.
 
-## Testing
+## Minimal Example
 
-```bash
-pytest tests/
-pytest contracts/ -v
-```
+```python
+from vrp_heuristics import (
+    GreedyInsertionSolver,
+    MatrixCostProvider,
+    ProblemInstance,
+    RequestSpec,
+    TerminalPolicy,
+    VehicleSpec,
+)
 
-Notebook execution tests require Jupyter and nbconvert:
-
-```bash
-python tests/tutorials/test_notebooks.py
+cost = MatrixCostProvider(
+    distance_matrix=[
+        [0, 1, 3],
+        [1, 0, 2],
+        [3, 2, 0],
+    ]
+)
+problem = ProblemInstance(
+    requests={
+        "R1": RequestSpec("R1", pickup_node=1, dropoff_node=2),
+    },
+    vehicles={
+        "V1": VehicleSpec(
+            "V1",
+            start_depot=0,
+            end_depot=0,
+            terminal_policy=TerminalPolicy("return_to_depot"),
+            capacity_weight=1.0,
+        ),
+    },
+    cost_provider=cost,
+)
+solution = GreedyInsertionSolver().solve(problem)
+print(solution.routes["V1"].stops)
 ```
 
 ## Development
 
-Common maintenance commands:
-
 ```bash
-black vrp_toolkit tests contracts playground
-ruff check vrp_toolkit tests contracts playground
-python -m compileall -q vrp_toolkit playground contracts tests run_tests.py
+python -m compileall -q vrp_heuristics
+uv run python -c "import vrp_heuristics; print(vrp_heuristics.__all__)"
 ```
-
-See `DEVELOPMENT.md` for roadmap and repository hygiene notes.
-
-## License
-
-MIT. See `pyproject.toml` and the repository license file when present.
